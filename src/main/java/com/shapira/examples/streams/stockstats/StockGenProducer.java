@@ -1,9 +1,10 @@
 package com.shapira.examples.streams.stockstats;
 
+import com.shapira.examples.streams.stockstats.Serde.JsonSerializer;
+import com.shapira.examples.streams.stockstats.model.Trade;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import com.shapira.examples.streams.stockstats.avro.Trade;
 
 
 import java.util.HashMap;
@@ -30,13 +31,14 @@ public class StockGenProducer {
             }
         });
 
+        JsonSerializer<Trade> tradeSerializer = new JsonSerializer<>();
+
         // Configuring producer
         Properties props = new Properties();
 
         props.put("bootstrap.servers", Constants.BROKER);
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "io.confluent.kafka.serializers.KafkaAvroSerializer");
-        props.put("schema.registry.url", "http://localhost:8081");
+        props.put("value.serializer", tradeSerializer.getClass().getName());
 
         // Starting producer
         producer = new KafkaProducer<>(props);
