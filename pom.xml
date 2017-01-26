@@ -38,6 +38,19 @@
             <artifactId>gson</artifactId>
             <version>2.2.2</version>
         </dependency>
+        <!--Binding for log4j version 1.2.x You also need to
+place log4j.jar on your class path. -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.21</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
