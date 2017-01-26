@@ -1,24 +1,19 @@
 package com.shapira.examples.streams.stockstats;
 
-import com.shapira.examples.streams.stockstats.Serde.JsonDeserializer;
-import com.shapira.examples.streams.stockstats.Serde.JsonSerializer;
-import com.shapira.examples.streams.stockstats.Serde.WrapperSerde;
+import com.shapira.examples.streams.stockstats.serde.JsonDeserializer;
+import com.shapira.examples.streams.stockstats.serde.JsonSerializer;
+import com.shapira.examples.streams.stockstats.serde.WrapperSerde;
 import com.shapira.examples.streams.stockstats.model.TickerWindow;
 import com.shapira.examples.streams.stockstats.model.Trade;
 import com.shapira.examples.streams.stockstats.model.TradeStats;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.TimeWindows;
-import org.apache.kafka.streams.kstream.Windowed;
-import org.apache.kafka.streams.kstream.Windows;
 
 import java.util.Properties;
 

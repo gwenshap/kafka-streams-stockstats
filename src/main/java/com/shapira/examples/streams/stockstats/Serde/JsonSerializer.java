@@ -1,4 +1,4 @@
-package com.shapira.examples.streams.stockstats.Serde;
+package com.shapira.examples.streams.stockstats.serde;
 
 import com.google.gson.Gson;
 import org.apache.kafka.common.serialization.Serializer;

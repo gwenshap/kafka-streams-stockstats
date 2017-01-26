@@ -1,4 +1,4 @@
-package com.shapira.examples.streams.stockstats.Serde;
+package com.shapira.examples.streams.stockstats.serde;
 
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;

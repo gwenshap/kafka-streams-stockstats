@@ -1,6 +1,6 @@
 package com.shapira.examples.streams.stockstats;
 
-import com.shapira.examples.streams.stockstats.Serde.JsonSerializer;
+import com.shapira.examples.streams.stockstats.serde.JsonSerializer;
 import com.shapira.examples.streams.stockstats.model.Trade;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
