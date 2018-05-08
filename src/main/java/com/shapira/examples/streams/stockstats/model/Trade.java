@@ -17,6 +17,10 @@ public class Trade {
         this.size = size;
     }
 
+    public double getPrice() {
+      return this.price;
+    }
+
     @Override
     public String toString() {
         return "Trade{" +

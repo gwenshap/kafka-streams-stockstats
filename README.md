@@ -27,7 +27,7 @@ If you want to reset state and re-run the application (maybe with some changes?)
 
 1. Reset internal topics (used for shuffle and state-stores):
 
-    `bin/kafka-streams-application-reset.sh --application-id stockstat --bootstrap-servers localhost:9092 --input-topic stocks`
+    `bin/kafka-streams-application-reset.sh --application-id stockstat --bootstrap-servers localhost:9092 --input-topics stocks`
 
 2. (optional) Delete the output topic:
 
