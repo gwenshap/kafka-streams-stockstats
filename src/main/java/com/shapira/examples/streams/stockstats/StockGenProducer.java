@@ -6,7 +6,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -34,9 +33,12 @@ public class StockGenProducer {
         JsonSerializer<Trade> tradeSerializer = new JsonSerializer<>();
 
         // Configuring producer
-        Properties props = new Properties();
+        Properties props;
+        if (args.length==1)
+            props = LoadConfigs.loadConfig(args[0]);
+        else
+            props = LoadConfigs.loadConfig();
 
-        props.put("bootstrap.servers", Constants.BROKER);
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", tradeSerializer.getClass().getName());
 
@@ -75,7 +77,7 @@ public class StockGenProducer {
 
                 producer.send(record, (RecordMetadata r, Exception e) -> {
                     if (e != null) {
-                        System.out.println("Error producing to topic " + r.topic());
+                        System.out.println("Error producing events");
                         e.printStackTrace();
                     }
                 });

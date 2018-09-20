@@ -3,17 +3,24 @@ package com.shapira.examples.streams.stockstats;
 import com.shapira.examples.streams.stockstats.serde.JsonDeserializer;
 import com.shapira.examples.streams.stockstats.serde.JsonSerializer;
 import com.shapira.examples.streams.stockstats.serde.WrapperSerde;
-import com.shapira.examples.streams.stockstats.model.TickerWindow;
 import com.shapira.examples.streams.stockstats.model.Trade;
 import com.shapira.examples.streams.stockstats.model.TradeStats;
-import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.DescribeClusterResult;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.KStreamBuilder;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.kstream.WindowedSerdes;
+import org.apache.kafka.streams.state.WindowStore;
 
 import java.util.Properties;
 
@@ -26,49 +33,59 @@ public class StockStatsExample {
 
     public static void main(String[] args) throws Exception {
 
-        Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "stockstat");
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, Constants.BROKER);
-        props.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        props.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, TradeSerde.class.getName());
+        Properties props;
+        if (args.length==1)
+            props = LoadConfigs.loadConfig(args[0]);
+        else
+            props = LoadConfigs.loadConfig();
+
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "stockstat-2");
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, TradeSerde.class.getName());
 
         // setting offset reset to earliest so that we can re-run the demo code with the same pre-loaded data
         // Note: To re-run the demo, you need to use the offset reset tool:
         // https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Streams+Application+Reset+Tool
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        // work-around for an issue around timing of creating internal topics
-        // this was resolved in 0.10.2.0 and above
-        // don't use in large production apps - this increases network load
-        // props.put(CommonClientConfigs.METADATA_MAX_AGE_CONFIG, 500);
+        // creating an AdminClient and checking the number of brokers in the cluster, so I'll know how many replicas we want...
 
-        KStreamBuilder builder = new KStreamBuilder();
+        AdminClient ac = AdminClient.create(props);
+        DescribeClusterResult dcr = ac.describeCluster();
+        int clusterSize = dcr.nodes().get().size();
+
+        if (clusterSize<3)
+            props.put("replication.factor",clusterSize);
+        else
+            props.put("replication.factor",3);
+
+        StreamsBuilder builder = new StreamsBuilder();
 
         KStream<String, Trade> source = builder.stream(Constants.STOCK_TOPIC);
 
-        KStream<TickerWindow, TradeStats> stats = source.groupByKey()
-                .aggregate(TradeStats::new,
-                    (k, v, tradestats) -> tradestats.add(v),
-                    TimeWindows.of(5000).advanceBy(1000),
-                    new TradeStatsSerde(),
-                    "trade-stats-store")
-                .toStream((key, value) -> new TickerWindow(key.key(), key.window().start()))
+        KStream<Windowed<String>, TradeStats> stats = source
+                .groupByKey()
+                .windowedBy(TimeWindows.of(5000).advanceBy(1000))
+                .<TradeStats>aggregate(() -> new TradeStats(),(k, v, tradestats) -> tradestats.add(v),
+                        Materialized.<String, TradeStats, WindowStore<Bytes, byte[]>>as("trade-aggregates")
+                                .withValueSerde(new TradeStatsSerde()))
+                .toStream()
                 .mapValues((trade) -> trade.computeAvgPrice());
 
-        stats.to(new TickerWindowSerde(), new TradeStatsSerde(),  "stockstats-output");
+        stats.to("stockstats-output", Produced.keySerde(WindowedSerdes.timeWindowedSerdeFrom(String.class)));
 
+        Topology topology = builder.build();
 
-        KafkaStreams streams = new KafkaStreams(builder, props);
+        KafkaStreams streams = new KafkaStreams(topology, props);
+
+        System.out.println(topology.describe());
 
         streams.cleanUp();
 
         streams.start();
 
-        // usually the stream application would be running forever,
-        // in this example we just let it run for some time and stop since the input data is finite.
-        Thread.sleep(60000L);
-
-        streams.close();
+        // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
+        Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
 
     }
 
@@ -81,12 +98,6 @@ public class StockStatsExample {
     static public final class TradeStatsSerde extends WrapperSerde<TradeStats> {
         public TradeStatsSerde() {
             super(new JsonSerializer<TradeStats>(), new JsonDeserializer<TradeStats>(TradeStats.class));
-        }
-    }
-
-    static public final class TickerWindowSerde extends WrapperSerde<TickerWindow> {
-        public TickerWindowSerde() {
-            super(new JsonSerializer<TickerWindow>(), new JsonDeserializer<TickerWindow>(TickerWindow.class));
         }
     }
 
