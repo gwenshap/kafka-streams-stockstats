@@ -58,6 +58,33 @@ If you want to build a Docker image and publish to Google's private docker regis
 1. Build an image and push to the docker registry: `mvn compile jib:build`
 or you can build to a local tar: `mvn compile jib:buildTar`
 
-2. Run the image: `docker run -ti --rm gcr.io/gwen-test-202722/kafka-streams-stockstats:v1`
+2. Run the image: `docker run -ti --rm gcr.io/gwen-test-202722/kafka-streams-stockstats:latest`
 
-3. 
+If you want to run on Kubernetes (GKE example)
+
+1. Create GKE cluster:
+
+`gcloud container clusters create kafka-streams-cluster \
+     --num-nodes 2 \
+     --machine-type n1-standard-1 \
+     --zone us-central1-c`
+     
+2. Deploy the container (stateless) - one instance, as specified in deployment:
+`kubectl create -f kafka-streams-stockstats-deployment.yaml`
+
+you can start another window to watch the logs:
+``kubectl logs `kubectl get pods -l app=streams-stock-stats -o=name` -f``
+
+and you can watch the output (with timestamps!):
+`ccloud consume -t stockstats-output | ruby -pe 'print Time.now.strftime("[%Y-%m-%d %H:%M:%S] ")'`
+
+3. Now scale up to 3 instances (more is pointless since we only have 3 partitions):
+`kubectl scale deployment streams-stock-stats --replicas=3`
+
+Watch the logs for the rebalance and the output to see that the job just keeps running!
+
+4. And scale back down:
+`kubectl scale deployment streams-stock-stats --replicas=1`
+
+5. Finally, you can just kill the whole job:
+`kubectl delete -f kafka-streams-stockstats-deployment.yaml`

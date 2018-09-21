@@ -1,0 +1,22 @@
+---
+apiVersion: "extensions/v1beta1"
+kind: "Deployment"
+metadata:
+  name: "streams-stock-stats"
+  namespace: "default"
+  labels:
+    app: "streams-stock-stats"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "streams-stock-stats"
+  template:
+    metadata:
+      labels:
+        app: "streams-stock-stats"
+    spec:
+      containers:
+      - name: "kafka-streams-stockstat"
+        image: "gcr.io/gwen-test-202722/kafka-streams-stockstat:latest"
+
