@@ -49,3 +49,15 @@ If you want to reset state and re-run the application (maybe with some changes?)
 2. (optional) Delete the output topic:
 
     `bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic stockstats-output`
+    
+    
+If you want to build a Docker image and publish to Google's private docker registry:
+    
+0. Make sure Docker is running and edit the pom.xml file to point to the docker repository of your choice (currently it is Google's).
+
+1. Build an image and push to the docker registry: `mvn compile jib:build`
+or you can build to a local tar: `mvn compile jib:buildTar`
+
+2. Run the image: `docker run -ti --rm gcr.io/gwen-test-202722/kafka-streams-stockstats:v1`
+
+3. 

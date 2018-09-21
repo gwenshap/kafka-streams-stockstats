@@ -78,6 +78,27 @@ place log4j.jar on your class path. -->
                     <finalName>uber-${artifactId}-${version}</finalName>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>0.9.10</version>
+                <configuration>
+                    <!-- add the config file I'm using. You can also remove this and place your file in src/main/jib -->
+                    <extraDirectory>/Users/gwen/.ccloud</extraDirectory>
+                    <from>
+                        <image>gcr.io/distroless/java:debug</image>
+                    </from>
+                    <to>
+                        <image>gcr.io/gwen-test-202722/kafka-streams-stockstat</image>
+                    </to>
+                    <container>
+                        <mainClass>com.shapira.examples.streams.stockstats.StockStatsExample</mainClass>
+                        <args>
+                            <arg>/config</arg>
+                        </args>
+                    </container>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

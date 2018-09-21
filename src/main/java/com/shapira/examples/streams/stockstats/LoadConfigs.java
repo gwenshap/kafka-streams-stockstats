@@ -24,7 +24,7 @@ public class LoadConfigs {
 
     static Properties loadConfig(String configFile) throws IOException {
         if (!Files.exists(Paths.get(configFile))) {
-            throw new RuntimeException("You need a file with client configuration, " +
+            throw new RuntimeException(configFile + " does not exist. You need a file with client configuration, " +
                     "either create one or run `ccloud init` if you are a Confluent Cloud user");
         }
         System.out.println("Loading configs from:" + configFile);
