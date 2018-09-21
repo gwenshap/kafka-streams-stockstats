@@ -6,9 +6,9 @@ For simplicity we only include 'ASK' types and only 10 fake stocks. Every second
 
 In next iteration we'll also add the 3 stocks with lowest price every 10 seconds.
 
-To run:
---------
+## To run:
 0. Build the project with `mvn package`, this will generate an uber-jar with the streams app and all its dependencies.
+
 1. Create a stocks input topic and output topic:
 
     ```
@@ -34,13 +34,13 @@ To run:
 
 5. Check the results:
 
-`ccloud consume -b -t stockstats-output`
+   `ccloud consume -b -t stockstats-output`
 
-or
+   or
 
-`bin/kafka-console-consumer.sh --topic stockstats-output --from-beginning --bootstrap-server localhost:9092  --property print.key=true`
+   `bin/kafka-console-consumer.sh --topic stockstats-output --from-beginning --bootstrap-server localhost:9092  --property print.key=true`
 
-If you want to reset state and re-run the application (maybe with some changes?) on existing input topic, you can:
+## If you want to reset state and re-run the application (maybe with some changes?) on existing input topic, you can:
 
 1. Reset internal topics (used for shuffle and state-stores):
 
@@ -51,7 +51,7 @@ If you want to reset state and re-run the application (maybe with some changes?)
     `bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic stockstats-output`
     
     
-If you want to build a Docker image and publish to Google's private docker registry:
+## If you want to build a Docker image and publish to Google's private docker registry:
     
 0. Make sure Docker is running and edit the pom.xml file to point to the docker repository of your choice (currently it is Google's).
 
@@ -60,10 +60,9 @@ or you can build to a local tar: `mvn compile jib:buildTar`
 
 2. Run the image: `docker run -ti --rm gcr.io/gwen-test-202722/kafka-streams-stockstats:latest`
 
-If you want to run on Kubernetes (GKE example)
+## If you want to run on Kubernetes (GKE example)
 
 1. Create GKE cluster:
-
 `gcloud container clusters create kafka-streams-cluster \
      --num-nodes 2 \
      --machine-type n1-standard-1 \
@@ -72,16 +71,16 @@ If you want to run on Kubernetes (GKE example)
 2. Deploy the container (stateless) - one instance, as specified in deployment:
 `kubectl create -f kafka-streams-stockstats-deployment.yaml`
 
-you can start another window to watch the logs:
+   you can start another window to watch the logs:
 ``kubectl logs `kubectl get pods -l app=streams-stock-stats -o=name` -f``
 
-and you can watch the output (with timestamps!):
+   and you can watch the output (with timestamps!):
 `ccloud consume -t stockstats-output | ruby -pe 'print Time.now.strftime("[%Y-%m-%d %H:%M:%S] ")'`
 
 3. Now scale up to 3 instances (more is pointless since we only have 3 partitions):
 `kubectl scale deployment streams-stock-stats --replicas=3`
 
-Watch the logs for the rebalance and the output to see that the job just keeps running!
+   Watch the logs for the rebalance and the output to see that the job just keeps running!
 
 4. And scale back down:
 `kubectl scale deployment streams-stock-stats --replicas=1`
