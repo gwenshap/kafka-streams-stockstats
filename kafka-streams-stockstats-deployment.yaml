@@ -16,7 +16,20 @@ spec:
       labels:
         app: "streams-stock-stats"
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - "streams-stock-stats"
+            topologyKey: "kubernetes.io/hostname"
       containers:
       - name: "kafka-streams-stockstat"
         image: "gcr.io/gwen-test-202722/kafka-streams-stockstat:latest"
+        env:
+        - name: JAVA_TOOL_OPTIONS
+          value: -DLOGLEVEL=INFO
 
