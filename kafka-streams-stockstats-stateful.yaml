@@ -16,6 +16,7 @@ metadata:
 spec:
   serviceName: "streams-stock-stats"
   replicas: 2
+  podManagementPolicy: "Parallel"
   selector:
     matchLabels:
       app: streams-stock-stats
