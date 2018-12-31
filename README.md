@@ -2,7 +2,7 @@
 Kafka Streams Example - Some aggregates on fake stock data
 
 This example reads fake "trades" from topic 'stocks'. Each trade includes a type ('ASK' or 'BID'), the stock ticker identifier, the ask price and number of stocks they offer to buy.
-For simplicity we only include 'ASK' types and only 10 fake stocks. Every second we output statistics on the pervious 5 second window - number of trades, minimum price, avg price and total price.
+For simplicity we only include 'ASK' types and only 10 fake stocks. Every second we output statistics on the previous 5 second window - number of trades, minimum price, avg price and total price.
 
 In next iteration we'll also add the 3 stocks with lowest price every 10 seconds.
 
