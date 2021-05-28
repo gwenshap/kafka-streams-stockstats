@@ -11,20 +11,22 @@ In next iteration we'll also add the 3 stocks with lowest price every 10 seconds
 
 1. Create a stocks input topic and output topic:
 
-    ```
-    ccloud topic create -t stocks --partitions 3
-    
-    ccloud topic create -t stockstats-output --partitions 3
-    ```
-    or
+Assuming you have a Confluent Cloud cluster and [ccloud CLI](https://docs.confluent.io/ccloud-cli/current/install.html) configured to use it:
 
     ```
-    bin/kafka-topics.sh --zookeeper localhost:2181 --create --topic stocks --partitions 1 --replication-factor 1`
+    ccloud kafka topic create stocks --partitions 3
     
-    bin/kafka-topics.sh --zookeeper localhost:2181 --create --topic stockstats-output --partitions 1 --replication-factor 1
+    ccloud kafka topic create stockstats-output --partitions 3
+    ```
+    
+For testing with a local Kafka broker:
+
+    ```
+    bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic stocks --partitions 1 --replication-factor 1
+    
+    bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic stockstats-output --partitions 1 --replication-factor 1
    ```
-
-2. We need a configuration file to tell us which brokers to connect to and how to connect to them. If you are a Confluent Cloud user and used ccloud earlier, we are good. Otherwise, create a file with `bootstrap.servers` and any other parameters you need to connect to your brokers (security, etc). You can put other client configation here, but we may override it.
+2. We need a configuration file to tell us which brokers to connect to and how to connect to them. Create a file with bootstrap.servers and any other parameters you need to connect to your brokers (security, etc). You can put other client configation here, but this Kafka Streams application may override some of them.
 
 3. Next, we need to generate some trades so we can analyze them. Start running the trades producer and stop it with ctrl-c when you think there's enough data:
 `$ java -cp target/uber-kafka-streams-stockstats-1.1-SNAPSHOT.jar -DLOGLEVEL=INFO com.shapira.examples.streams.stockstats.StockGenProducer <config file>`
@@ -38,7 +40,7 @@ In next iteration we'll also add the 3 stocks with lowest price every 10 seconds
 
    or
 
-   `bin/kafka-console-consumer.sh --topic stockstats-output --from-beginning --bootstrap-server localhost:9092  --property print.key=true`
+   `bin/kafka-console-consumer.sh --topic stockstats-output --from-beginning --bootstrap-server localhost:9092`
 
 ## If you want to reset state and re-run the application (maybe with some changes?) on existing input topic, you can:
 
@@ -48,7 +50,7 @@ In next iteration we'll also add the 3 stocks with lowest price every 10 seconds
 
 2. (optional) Delete the output topic:
 
-    `bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic stockstats-output`
+    `bin/kafka-topics.sh --bootstrap-server localhost:9092  --delete --topic stockstats-output`
     
     
 ## If you want to build a Docker image and publish to Google's private docker registry:
