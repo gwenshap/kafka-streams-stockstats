@@ -13,19 +13,19 @@ In next iteration we'll also add the 3 stocks with lowest price every 10 seconds
 
 Assuming you have a Confluent Cloud cluster and [ccloud CLI](https://docs.confluent.io/ccloud-cli/current/install.html) configured to use it:
 
-    ```
+    
     ccloud kafka topic create stocks --partitions 3
     
     ccloud kafka topic create stockstats-output --partitions 3
-    ```
+    
     
 For testing with a local Kafka broker:
 
-    ```
+    
     bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic stocks --partitions 1 --replication-factor 1
     
     bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic stockstats-output --partitions 1 --replication-factor 1
-   ```
+   
    
 2. We need a configuration file to tell us which brokers to connect to and how to connect to them. Create a file with bootstrap.servers and any other parameters you need to connect to your brokers (security, etc). You can put other client configation here, but this Kafka Streams application may override some of them.
 
