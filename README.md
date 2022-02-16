@@ -26,6 +26,7 @@ For testing with a local Kafka broker:
     
     bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic stockstats-output --partitions 1 --replication-factor 1
    ```
+   
 2. We need a configuration file to tell us which brokers to connect to and how to connect to them. Create a file with bootstrap.servers and any other parameters you need to connect to your brokers (security, etc). You can put other client configation here, but this Kafka Streams application may override some of them.
 
 3. Next, we need to generate some trades so we can analyze them. Start running the trades producer and stop it with ctrl-c when you think there's enough data:
